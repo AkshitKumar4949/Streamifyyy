@@ -1,6 +1,5 @@
-import React, { useEffect } from 'react'
+import React from 'react'
 import { useQueryClient } from '@tanstack/react-query'
-import { useState } from 'react'
 import { getRecommendedUsers,getUserFriends,getOutgoingFriendReqs,sendFriendRequest } from '../lib/api'
 import { Link } from 'react-router'
 import { UserPlusIcon, MapPinIcon , CheckCircleIcon} from 'lucide-react'
@@ -14,7 +13,6 @@ import { capitialize } from '../lib/utils'
 
 const HomePage = () => {
   const queryClient = useQueryClient()
-  const [outgoingRequestsIds,setOutgoingRequestsIds] = useState(new Set())
 
   const {
     data:friendsPages,
@@ -28,7 +26,7 @@ const HomePage = () => {
     initialPageParam: 1,
     getNextPageParam: (lastPage) => lastPage.hasMore ? lastPage.page + 1 : undefined,
   })
-  const friends = friendsPages?.pages.flatMap((page) => page.friends) || []
+  const friends = friendsPages?.pages.flatMap((page) => Array.isArray(page) ? page : page?.friends || []).filter(Boolean) || []
   const {
     data:recommendedPages,
     isLoading:loadingUsers,
@@ -41,7 +39,7 @@ const HomePage = () => {
     initialPageParam: 1,
     getNextPageParam: (lastPage) => lastPage.hasMore ? lastPage.page + 1 : undefined,
   })
-  const recommendedUsers = recommendedPages?.pages.flatMap((page) => page.users) || []
+  const recommendedUsers = recommendedPages?.pages.flatMap((page) => Array.isArray(page) ? page : page?.users || []).filter(Boolean) || []
   const { data: outgoingFriendReqs } = useQuery({
     queryKey: ["outgoingFriendReqs"],
     queryFn: getOutgoingFriendReqs,
@@ -51,15 +49,11 @@ const HomePage = () => {
     onSuccess: ()=>queryClient.invalidateQueries({queryFn:["outgoingFriendReqs"]}),
 
   })
-  useEffect(()=>{
-    const outgoingIds = new Set()
-    if(outgoingFriendReqs && outgoingFriendReqs.length>0){
-      outgoingFriendReqs.forEach((req)=>{
-        outgoingIds.add(req.recipient._id)
-      })
-      setOutgoingRequestsIds(outgoingIds);
-    }
-  },[outgoingFriendReqs])
+  const outgoingRequestsIds = new Set(
+    (outgoingFriendReqs || [])
+      .map((req) => req.recipient?._id)
+      .filter(Boolean)
+  )
   return (
     <div className='p-4 sm:p-6 lg:p-8'>
       <div className='container mx-auto space-y-10'>
