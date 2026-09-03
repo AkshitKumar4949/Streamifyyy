@@ -5,6 +5,7 @@ import { ShipWheelIcon } from 'lucide-react'
 import { useState } from 'react'
 import useLogin from '../hooks/useLogin'
 import { Link } from 'react-router'
+import GoogleAuthButton from '../components/GoogleAuthButton'
 const LoginPage = () => {
   const [loginData, setLoginData] = useState({
     email: "",
@@ -93,6 +94,9 @@ const LoginPage = () => {
                       "Sign In"
                     )}
                   </button>
+
+                  <div className="divider">OR</div>
+                  <GoogleAuthButton />
 
                   <div className="text-center mt-4">
                     <p className="text-sm">

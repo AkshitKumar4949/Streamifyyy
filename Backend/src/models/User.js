@@ -10,6 +10,11 @@ const userSchema = new mongoose.Schema({
         required:true,
         unique:true
     },
+    googleId:{
+        type:String,
+        unique:true,
+        sparse:true
+    },
     password:{
         type:String,
         minlength:6,
@@ -38,6 +43,18 @@ const userSchema = new mongoose.Schema({
     isOnboarded:{
         type:Boolean,
         default:false
+    },
+    isVerified:{
+        type:Boolean,
+        default:false
+    },
+    verificationCode:{
+        type:String,
+        default:null
+    },
+    verificationCodeExpires:{
+        type:Date,
+        default:null
     },
 
     friends:[{

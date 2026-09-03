@@ -1,12 +1,14 @@
 import React from 'react'
 import { ShipWheelIcon } from 'lucide-react'
 import { useState } from 'react'
-import { Link } from "react-router"
+import { Link, useNavigate } from "react-router"
 import useSignup from '../hooks/useSignup'
+import GoogleAuthButton from '../components/GoogleAuthButton'
 // import { signup } from '../lib/api'
 // import { useQueryClient } from '@tanstack/react-query'
 // import { useMutation } from '@tanstack/react-query'
 const SignUpPage = () => {
+  const navigate = useNavigate()
   const [signupData, setSignupData] = useState({
     fullName: "",
     email: "",
@@ -16,7 +18,9 @@ const SignUpPage = () => {
   const {isPending,error,signupMutation} = useSignup()
   const handleSignup = (e) => {
     e.preventDefault()
-    signupMutation(signupData)
+    signupMutation(signupData, {
+      onSuccess: () => navigate('/verify-email', { state: { email: signupData.email } }),
+    })
   }
   return (
     <div className='h-screen flex items-center justify-center p-4 sm:p-6 md:p-8' data-theme="forest">
@@ -107,6 +111,9 @@ const SignUpPage = () => {
                     </>
                   ) : ("Create Account") }
                 </button>
+
+                <div className="divider">OR</div>
+                <GoogleAuthButton />
 
                 <div className="text-center mt-4">
                   <p className="text-sm">

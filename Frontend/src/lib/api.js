@@ -3,6 +3,14 @@ export const signup = async (signupData) => {
     const response = await axiosInstance.post("/auth/signup", signupData)
     return response.data
 }
+export const verifyEmail = async (verificationData) => {
+    const response = await axiosInstance.post("/auth/verify-email", verificationData)
+    return response.data
+}
+export const googleAuth = async (credential) => {
+    const response = await axiosInstance.post("/auth/google", credential)
+    return response.data
+}
 export const login = async(loginData) =>{
     const response = await axiosInstance.post("/auth/login",loginData)
     return response.data
@@ -21,6 +29,10 @@ export const getAuthUser = async () => {
 }
 export const completeOnboarding = async(userData)=>{
     const response = await axiosInstance.post("/auth/onboarding",userData)
+    return response.data
+}
+export const updateProfile = async(profileData)=>{
+    const response = await axiosInstance.patch("/auth/profile", profileData)
     return response.data
 }
 export async function getUserFriends(){
