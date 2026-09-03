@@ -29,10 +29,19 @@ const HomePage = () => {
     getNextPageParam: (lastPage) => lastPage.hasMore ? lastPage.page + 1 : undefined,
   })
   const friends = friendsPages?.pages.flatMap((page) => page.friends) || []
-  const {data:recommendedUsers=[],isLoading:loadingUsers} = useQuery({
+  const {
+    data:recommendedPages,
+    isLoading:loadingUsers,
+    hasNextPage:hasMoreLearners,
+    fetchNextPage:fetchMoreLearners,
+    isFetchingNextPage:isFetchingMoreLearners,
+  } = useInfiniteQuery({
     queryKey:["users"],
-    queryFn: getRecommendedUsers
+    queryFn: getRecommendedUsers,
+    initialPageParam: 1,
+    getNextPageParam: (lastPage) => lastPage.hasMore ? lastPage.page + 1 : undefined,
   })
+  const recommendedUsers = recommendedPages?.pages.flatMap((page) => page.users) || []
   const { data: outgoingFriendReqs } = useQuery({
     queryKey: ["outgoingFriendReqs"],
     queryFn: getOutgoingFriendReqs,
@@ -173,6 +182,14 @@ const HomePage = () => {
                   </div>
                 );
               })}
+            </div>
+          )}
+          {hasMoreLearners && (
+            <div className="flex justify-center mt-5">
+              <button className="btn btn-outline" onClick={() => fetchMoreLearners()} disabled={isFetchingMoreLearners}>
+                {isFetchingMoreLearners && <span className="loading loading-spinner loading-xs" />}
+                {isFetchingMoreLearners ? "Loading learners..." : "Load more learners"}
+              </button>
             </div>
           )}
         </section>

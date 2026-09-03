@@ -39,8 +39,8 @@ export async function getUserFriends({ pageParam = 1 } = {}){
     const response = await axiosInstance.get("users/friends", { params: { page: pageParam, limit: 12 } })
     return response.data
 }
-export async function getRecommendedUsers(){
-    const response = await axiosInstance.get("users")
+export async function getRecommendedUsers({ pageParam = 1 } = {}){
+    const response = await axiosInstance.get("users", { params: { page: pageParam, limit: 12 } })
     return response.data
 }
 export async function getOutgoingFriendReqs(){
