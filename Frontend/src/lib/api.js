@@ -35,8 +35,8 @@ export const updateProfile = async(profileData)=>{
     const response = await axiosInstance.patch("/auth/profile", profileData)
     return response.data
 }
-export async function getUserFriends(){
-    const response = await axiosInstance.get("users/friends")
+export async function getUserFriends({ pageParam = 1 } = {}){
+    const response = await axiosInstance.get("users/friends", { params: { page: pageParam, limit: 12 } })
     return response.data
 }
 export async function getRecommendedUsers(){

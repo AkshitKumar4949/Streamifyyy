@@ -23,9 +23,22 @@ export async function getRecommendedUsers(req,res){
 
 export async function getFriends(req,res){
     try{
-        const user = await User.findById(req.user.id).select("friends").
-        populate("friends","fullName profilePic nativeLanguage learningLanguage")
-        res.status(200).json(user.friends)
+        const page = Math.max(Number.parseInt(req.query.page, 10) || 1, 1)
+        const limit = Math.min(Math.max(Number.parseInt(req.query.limit, 10) || 12, 1), 50)
+        const user = await User.findById(req.user.id).select("friends")
+        if (!user) return res.status(404).json({ message: "User not found" })
+
+        const skip = (page - 1) * limit
+        const friendIds = user.friends.slice(skip, skip + limit)
+        const friends = await User.find({ _id: { $in: friendIds } })
+            .select("fullName profilePic nativeLanguage learningLanguage")
+
+        res.status(200).json({
+            friends,
+            page,
+            hasMore: skip + friends.length < user.friends.length,
+            total: user.friends.length,
+        })
     }
     catch(error){
         console.error("Error fetching friends:",error.message)

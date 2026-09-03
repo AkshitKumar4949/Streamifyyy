@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import { useInfiniteQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { Link } from 'react-router'
 import { ArrowLeftIcon, CheckIcon, MessageCircleIcon, UploadIcon, UsersIcon } from 'lucide-react'
 import useAuthUser from '../hooks/useAuthUser'
@@ -19,10 +19,19 @@ const ProfilePage = () => {
     },
     onError: (error) => toast.error(error.response?.data?.message || 'Could not update profile photo'),
   })
-  const { data: friends = [], isLoading } = useQuery({
+  const {
+    data: friendsPages,
+    isLoading,
+    hasNextPage,
+    fetchNextPage,
+    isFetchingNextPage,
+  } = useInfiniteQuery({
     queryKey: ['friends'],
     queryFn: getUserFriends,
+    initialPageParam: 1,
+    getNextPageParam: (lastPage) => lastPage.hasMore ? lastPage.page + 1 : undefined,
   })
+  const friends = friendsPages?.pages.flatMap((page) => page.friends) || []
 
   const handleImageChange = (event) => {
     const file = event.target.files?.[0]
@@ -110,6 +119,14 @@ const ProfilePage = () => {
                   </div>
                 </div>
               ))}
+            </div>
+          )}
+          {hasNextPage && (
+            <div className="flex justify-center mt-5">
+              <button className="btn btn-outline" onClick={() => fetchNextPage()} disabled={isFetchingNextPage}>
+                {isFetchingNextPage && <span className="loading loading-spinner loading-xs" />}
+                {isFetchingNextPage ? 'Loading friends...' : 'Load more friends'}
+              </button>
             </div>
           )}
         </section>

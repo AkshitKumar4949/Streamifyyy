@@ -4,7 +4,7 @@ import { useState } from 'react'
 import { getRecommendedUsers,getUserFriends,getOutgoingFriendReqs,sendFriendRequest } from '../lib/api'
 import { Link } from 'react-router'
 import { UserPlusIcon, MapPinIcon , CheckCircleIcon} from 'lucide-react'
-import { useQuery } from '@tanstack/react-query'
+import { useInfiniteQuery, useQuery } from '@tanstack/react-query'
 import { useMutation } from '@tanstack/react-query'
 import { UsersIcon } from 'lucide-react'
 import FriendCard from '../components/FriendCard'
@@ -16,10 +16,19 @@ const HomePage = () => {
   const queryClient = useQueryClient()
   const [outgoingRequestsIds,setOutgoingRequestsIds] = useState(new Set())
 
-  const {data:friends=[],isLoading:loadingFriends} = useQuery({
+  const {
+    data:friendsPages,
+    isLoading:loadingFriends,
+    hasNextPage,
+    fetchNextPage,
+    isFetchingNextPage,
+  } = useInfiniteQuery({
     queryKey:["friends"],
-    queryFn: getUserFriends
+    queryFn: getUserFriends,
+    initialPageParam: 1,
+    getNextPageParam: (lastPage) => lastPage.hasMore ? lastPage.page + 1 : undefined,
   })
+  const friends = friendsPages?.pages.flatMap((page) => page.friends) || []
   const {data:recommendedUsers=[],isLoading:loadingUsers} = useQuery({
     queryKey:["users"],
     queryFn: getRecommendedUsers
@@ -65,6 +74,14 @@ const HomePage = () => {
               <FriendCard key={friend._id} friend={friend}/>
             ))
             }
+          </div>
+        )}
+        {hasNextPage && (
+          <div className="flex justify-center -mt-6">
+            <button className="btn btn-outline" onClick={() => fetchNextPage()} disabled={isFetchingNextPage}>
+              {isFetchingNextPage && <span className="loading loading-spinner loading-xs" />}
+              {isFetchingNextPage ? "Loading friends..." : "Load more friends"}
+            </button>
           </div>
         )}
 
